@@ -18,7 +18,16 @@ function renderNotesTable() {
         tr.innerHTML = `
             <td contenteditable="true" data-field="name">${note.name}</td>
             <td>${note.time}</td>
-            <td contenteditable="true" data-field="content">${note.category}</td>
+            <td>
+                <div class="col">
+                <select class="form-control" onchange="updateNoteData(this, ${note.id}, 'category')">
+                <option value="Task" ${note.category === 'Task' ? 'selected' : ''}>Task</option>
+                <option value="Random Thought" ${note.category === 'Random Thought' ? 'selected' : ''}>Random Thought</option>
+                <option value="Idea" ${note.category === 'Idea' ? 'selected' : ''}>Idea</option>
+                <option value="Quote" ${note.category === 'Quote' ? 'selected' : ''}>Quote</option>
+                </select>
+                </div>
+            </td>
             <td contenteditable="true" data-field="content">${note.content}</td>
             <td contenteditable="true" data-field="dates">${note.dates}</td>
             <td>
@@ -28,8 +37,8 @@ function renderNotesTable() {
                 <button class="btn btn-sm" onclick="deleteNote(${note.id})">
                 <span class="emoji">🗑️</span>
                 </button>
-                <button class="btn btn-sm" onclick="archiveNote(${note.id})">
-                <span class="emoji">📨</span>
+                <button class="btn btn-sm" onclick="archiveNote(${note.id})" data-archived="${note.archived}">
+                <span class="emoji">${note.archived ? '📚' : '📨'}</span>
                 </button>
             </td>
         `;
@@ -38,7 +47,7 @@ function renderNotesTable() {
         const nameField = tr.querySelector('[data-field="name"]');
         const contentField = tr.querySelector('[data-field="content"]');
         const datesField = tr.querySelector('[data-field="dates"]');
-
+        saveNotesToLocalStorage();
         nameField.addEventListener('keyup', (event) => updateNoteData(event, note.id, 'name'));
         contentField.addEventListener('keyup', (event) => updateNoteData(event, note.id, 'content'));
         datesField.addEventListener('keyup', (event) => updateNoteData(event, note.id, 'dates'));
@@ -113,19 +122,14 @@ function updateNoteData(event, noteId, field) {
 
 // Function to add a new note
 function addNote() {
-    const noteName = document.getElementById('noteName').value;
-    const noteCategory = document.getElementById('noteCategory').value;
-    const noteContent = document.getElementById('noteContent').value;
-    const noteDates = document.getElementById('noteDates').value;
-
-    // Add the new note to the data
+    
     const newNote = {
         id: notesData.length + 1,
-        name: noteName,
+        name: 'New Note',
         time: new Date().toLocaleString(),
-        content: noteContent,
-        category: noteCategory,
-        dates: noteDates,
+        content: '',
+        category: '',
+        dates: '',
         archived: false,
     };
     notesData.push(newNote);
@@ -133,16 +137,22 @@ function addNote() {
     renderNotesTable();
     renderSummaryTable();
 
-    //document.getElementById('addNoteForm').reset();
-
-    document.getElementById('noteName').value = '';
-    document.getElementById('noteCategory').value = '';
-    document.getElementById('noteContent').value = '';
-    document.getElementById('noteDates').value = '';
     // Save the changes to localStorage
     saveNotesToLocalStorage();
     
+    // Attach event listeners to the contenteditable fields of the new note
+    const newNoteRow = document.getElementById(`noteRow-${newNote.id}`);
+    if (newNoteRow) {
+        const nameField = newNoteRow.querySelector('[data-field="name"]');
+        const contentField = newNoteRow.querySelector('[data-field="content"]');
+        const datesField = newNoteRow.querySelector('[data-field="dates"]');
+
+        nameField.addEventListener('keyup', (event) => updateNoteData(event, newNote.id, 'name'));
+        contentField.addEventListener('keyup', (event) => updateNoteData(event, newNote.id, 'content'));
+        datesField.addEventListener('keyup', (event) => updateNoteData(event, newNote.id, 'dates'));
+    }
 }
+
 // Function to delete a note
 function deleteNote(noteId) {
 
@@ -157,8 +167,6 @@ function deleteNote(noteId) {
 
 // Function to archive a note
 function archiveNote(noteId) {
-    // Implement logic to archive a note
-    // Update the "archived" property of the corresponding note to true
     const note = notesData.find((note) => note.id === noteId);
     if (note) {
         note.archived = true;
@@ -168,6 +176,7 @@ function archiveNote(noteId) {
         if (row) {
             row.style.display = 'none';
         }
+        noteData = noteData.filter((note) => note.id !== noteId);
     }
 
     renderNotesTable();

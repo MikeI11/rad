@@ -13,7 +13,7 @@ table.table-bordered thead.first-row th {
 }
 
 table.table-bordered > tbody > tr  {
-  border: 12px solid #dee2e6;
+  border: 10px solid #dee2e6;
 }
 
 #addNoteForm {
@@ -29,9 +29,16 @@ table.table-bordered th {
     text-overflow: ellipsis;
 }
 
+
+
+td[data-field="name"],
+td[data-field="time"],
+td[data-field="content"],
+td[data-field="dates"],
 td[data-field="actions"] {
     width: 100px;
 }
+
 .emoji {
     font-size: 1.2rem;
 }
