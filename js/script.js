@@ -20,7 +20,7 @@ function renderNotesTable() {
             <td>${note.time}</td>
             <td>
                 <div class="col">
-                <select class="form-control" onchange="updateNoteData(this, ${note.id}, 'category')">
+                <select class="form-control gray-bg" onchange="updateNoteData(this, ${note.id}, 'category')">
                 <option value="Task" ${note.category === 'Task' ? 'selected' : ''}>Task</option>
                 <option value="Random Thought" ${note.category === 'Random Thought' ? 'selected' : ''}>Random Thought</option>
                 <option value="Idea" ${note.category === 'Idea' ? 'selected' : ''}>Idea</option>
@@ -128,7 +128,7 @@ function addNote() {
         name: 'New Note',
         time: new Date().toLocaleString(),
         content: '',
-        category: '',
+        category: 'Task',
         dates: '',
         archived: false,
     };
@@ -153,25 +153,20 @@ function addNote() {
     }
 }
 
-// Function to delete a note
 function deleteNote(noteId) {
-
     notesData = notesData.filter((note) => note.id !== noteId);
 
     renderNotesTable();
     renderSummaryTable();
 
-    // Save the changes to localStorage
     saveNotesToLocalStorage();
 }
 
-// Function to archive a note
 function archiveNote(noteId) {
     const note = notesData.find((note) => note.id === noteId);
     if (note) {
         note.archived = true;
 
-        // Find the row associated with the note and hide it
         const row = document.getElementById(`noteRow-${noteId}`);
         if (row) {
             row.style.display = 'none';
