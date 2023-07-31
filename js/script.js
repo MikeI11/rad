@@ -6,7 +6,7 @@ let notesData = [
     { id: 4, name: 'William Gaddins', time: '25/07/2023 13:45', content: 'Power does not contain', category: 'Quote', dates: '29/07/2023' },
     { id: 5, name:'Books', time: '25/07/2023 13:45', content: 'The lean Startup', category: 'Task', dates: '29/07/2023' },
 ];
-console.log(notesData);
+notesData = notesData.map((note) => ({ ...note, archived: false }));
 // Function to render the notes table
 function renderNotesTable() {
     const tableBody = document.getElementById('notesTableBody');
@@ -15,6 +15,7 @@ function renderNotesTable() {
     for (const note of notesData) {
         const tr = document.createElement('tr');
         tr.id = `noteRow-${note.id}`;
+        tr.style.display = note.archived ? 'none' : 'table-row';
         tr.innerHTML = `
             <td contenteditable="true" data-field="name">${note.name}</td>
             <td>${note.time}</td>
@@ -32,14 +33,15 @@ function renderNotesTable() {
             <td contenteditable="true" data-field="dates">${note.dates}</td>
             <td>
                 <button class="btn btn-sm mr-1" onclick="editNote(${note.id})">
-                <span class="emoji">📝</span>
+                    <span class="emoji">📝</span>
                 </button>
                 <button class="btn btn-sm" onclick="deleteNote(${note.id})">
-                <span class="emoji">🗑️</span>
+                    <span class="emoji">🗑️</span>
                 </button>
                 <button class="btn btn-sm" onclick="archiveNote(${note.id})" data-archived="${note.archived}">
-                <span class="emoji">${note.archived ? '📚' : '📨'}</span>
+                  <span class="emoji">${note.archived ? '📚' : '📨'}</span>
                 </button>
+                
             </td>
         `;
         tableBody.appendChild(tr);
@@ -73,12 +75,14 @@ function renderSummaryTable() {
         summaryTableBody.appendChild(tr);
     }
 }
-
 // Function to save the edited notes data to localStorage
 function saveNotesToLocalStorage() {
-    localStorage.setItem('notesData', JSON.stringify(notesData));
+    try {
+        localStorage.setItem('notesData', JSON.stringify(notesData));
+    } catch (error) {
+        console.log('Error while saving data to LocalStorage:', error);
+    }
 }
-
 // Function to load the notes data from localStorage on page load
 function loadNotesFromLocalStorage() {
     const savedNotesData = localStorage.getItem('notesData');
@@ -101,8 +105,6 @@ function editNote(noteId) {
                     note.content = updatedContent;
                     renderNotesTable();
                     renderSummaryTable();
-
-                    // Save the changes to localStorage
                     saveNotesToLocalStorage();
                 }
             }
@@ -118,7 +120,6 @@ function updateNoteData(event, noteId, field) {
         saveNotesToLocalStorage();
     }
 }
-
 
 // Function to add a new note
 function addNote() {
@@ -140,7 +141,6 @@ function addNote() {
     // Save the changes to localStorage
     saveNotesToLocalStorage();
     
-    // Attach event listeners to the contenteditable fields of the new note
     const newNoteRow = document.getElementById(`noteRow-${newNote.id}`);
     if (newNoteRow) {
         const nameField = newNoteRow.querySelector('[data-field="name"]');
@@ -165,19 +165,15 @@ function deleteNote(noteId) {
 function archiveNote(noteId) {
     const note = notesData.find((note) => note.id === noteId);
     if (note) {
-        note.archived = true;
+        note.archived = !note.archived;
 
         const row = document.getElementById(`noteRow-${noteId}`);
         if (row) {
-            row.style.display = 'none';
+            row.style.display = note.archived ? 'none' : 'table-row';
         }
-        noteData = noteData.filter((note) => note.id !== noteId);
     }
-
     renderNotesTable();
     renderSummaryTable();
-
-    // Save the changes to localStorage
     saveNotesToLocalStorage();
 }
 
