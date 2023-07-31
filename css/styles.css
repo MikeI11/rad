@@ -18,8 +18,7 @@ table.table-bordered > tbody > tr  {
 
 #addNoteForm {
   text-align: right;
-  padding-left: 50px;
-  
+  margin-right: 10px;
 }
 
 table.table-bordered td,
